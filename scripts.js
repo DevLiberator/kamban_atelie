@@ -6,7 +6,11 @@ const STORE_KEY = 'atelie_kacia_data';
 
 function loadData() {
   const raw = localStorage.getItem(STORE_KEY);
-  if (raw) return JSON.parse(raw);
+  if (raw) {
+    const data = JSON.parse(raw);
+    migrateOrders(data);
+    return data;
+  }
   return {
     orders: [],
     clients: [],
@@ -14,6 +18,19 @@ function loadData() {
     agenda: { prazos: [], retiradas: [], compras: [], compromissos: [] },
     despesas: []
   };
+}
+
+function migrateOrders(data) {
+  if (!data.orders) return;
+  const stageMap = {
+    ideias: 'orcamento',
+    aprovacao: 'orcamento',
+    material: 'producao'
+  };
+  data.orders.forEach(o => {
+    if (stageMap[o.stage]) o.stage = stageMap[o.stage];
+    if (!Array.isArray(o.provas)) o.provas = [false, false, false];
+  });
 }
 
 function saveData(data) {
@@ -30,6 +47,40 @@ function genId() {
 /* NAVIGATION                */
 /* ========================= */
 
+const BOTTOM_NAV_MAP = {
+  'dashboard': 'dashboard',
+  'kanban': 'kanban',
+  'encomendas-todas': 'encomendas',
+  'encomendas-andamento': 'encomendas',
+  'encomendas-entregues': 'encomendas',
+  'encomendas-canceladas': 'encomendas',
+  'clientes-cadastro': null,
+  'clientes-historico': null,
+  'clientes-contatos': null,
+  'materiais-tecidos': null,
+  'materiais-aviamentos': null,
+  'materiais-geral': null,
+  'materiais-estoque-baixo': null,
+  'agenda-prazos': 'agenda',
+  'agenda-retiradas': 'agenda',
+  'agenda-compras': 'agenda',
+  'agenda-compromissos': 'agenda',
+  'financeiro-receber': null,
+  'financeiro-recebido': null,
+  'financeiro-despesas': null,
+  'financeiro-lucro': null
+};
+
+function toggleMais() {
+  const overlay = document.getElementById('maisOverlay');
+  if (overlay) overlay.classList.toggle('open');
+}
+
+function toggleFabMenu() {
+  const menu = document.getElementById('fabMenu');
+  if (menu) menu.classList.toggle('open');
+}
+
 function navigateTo(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.submenu-item').forEach(s => s.classList.remove('active-sub'));
@@ -41,12 +92,29 @@ function navigateTo(page) {
   const subBtn = document.querySelector(`[data-page="${page}"]`);
   if (subBtn) subBtn.classList.add('active-sub');
 
+  document.querySelectorAll('.bottom-nav-item').forEach(b => b.classList.remove('active'));
+  const navKey = BOTTOM_NAV_MAP[page];
+  if (navKey) {
+    const btn = document.querySelector(`.bottom-nav-item[data-nav="${navKey}"]`);
+    if (btn) btn.classList.add('active');
+  }
+
+  const maisOverlay = document.getElementById('maisOverlay');
+  if (maisOverlay) maisOverlay.classList.remove('open');
+
+  const fabMenu = document.getElementById('fabMenu');
+  if (fabMenu) fabMenu.classList.remove('open');
+
   refreshPage(page);
 }
 
 function toggleSubmenu(id) {
   const sub = document.getElementById(id);
   if (sub) sub.classList.toggle('open');
+}
+
+function refreshPage() {
+  renderAll();
 }
 
 /* ========================= */
@@ -83,15 +151,13 @@ document.addEventListener('click', function(e) {
 /* ========================= */
 
 const STAGE_LABELS = {
-  ideias: 'Ideias',
-  orcamento: 'Orçamento',
-  aprovacao: 'Aguardando aprovação',
-  material: 'Aguardando material',
-  producao: 'Em produção',
-  acabamento: 'Acabamento',
-  pronto: 'Pronto',
-  entregue: 'Entregue',
-  cancelado: 'Cancelado'
+  orcamento:   'Orçamento',
+  producao:    'Em produção',
+  prova:       'Prova',
+  acabamento:  'Acabamento',
+  pronto:      'Pronto',
+  entregue:    'Entregue',
+  cancelado:   'Cancelado'
 };
 
 function stageLabel(key) {
@@ -111,7 +177,6 @@ function saveOrder() {
   const desc = document.getElementById('orderDesc').value.trim();
   const value = parseFloat(document.getElementById('orderValue').value) || 0;
   const deadline = document.getElementById('orderDeadline').value;
-  const stage = document.getElementById('orderStage').value;
   const notes = document.getElementById('orderNotes').value.trim();
 
   if (!client || !desc) {
@@ -125,8 +190,9 @@ function saveOrder() {
     description: desc,
     value: value,
     deadline: deadline,
-    stage: stage,
+    stage: 'orcamento',
     notes: notes,
+    provas: [false, false, false],
     createdAt: new Date().toISOString()
   });
 
@@ -141,7 +207,6 @@ function clearOrderForm() {
   document.getElementById('orderDesc').value = '';
   document.getElementById('orderValue').value = '';
   document.getElementById('orderDeadline').value = '';
-  document.getElementById('orderStage').value = 'ideias';
   document.getElementById('orderNotes').value = '';
 }
 
@@ -460,16 +525,39 @@ function renderKanban() {
     const stage = col.dataset.stage;
     const cardsContainer = col.querySelector('.column-cards');
     const orders = appData.orders.filter(o => o.stage === stage);
-    cardsContainer.innerHTML = orders.map(o => `
-      <div class="order-card" draggable="true" ondragstart="dragCard(event, '${o.id}')">
-        <strong>${o.description}</strong>
-        <p>${getClientName(o.clientId)}</p>
-        <div class="card-meta">
-          <span>${o.value ? formatCurrency(o.value) : ''}</span>
-          <span>${o.deadline ? formatDate(o.deadline) : ''}</span>
+    cardsContainer.innerHTML = orders.map(o => {
+      let proveHtml = '';
+      if (o.stage === 'prova') {
+        const provas = o.provas || [false, false, false];
+        proveHtml = '<div class="card-provas">' +
+          provas.map((p, i) =>
+            '<label class="prova-check" onclick="event.stopPropagation()">' +
+            '<input type="checkbox"' + (p ? ' checked' : '') +
+            ' onchange="toggleProva(\'' + o.id + '\', ' + i + ')">' +
+            '<span>Prova ' + (i + 1) + '</span>' +
+            '</label>'
+          ).join('') +
+          '</div>';
+      }
+
+      let advanceHtml = '';
+      if (o.stage === 'prova' && allProvesDone(o)) {
+        advanceHtml = '<div class="card-actions"><button class="btn-sm" onclick="event.stopPropagation(); advanceOrder(\'' + o.id + '\')">Avançar → Acabamento</button></div>';
+      }
+
+      return `
+        <div class="order-card" draggable="true" ondragstart="dragCard(event, '${o.id}')">
+          <strong>${o.description}</strong>
+          <p>${getClientName(o.clientId)}</p>
+          <div class="card-meta">
+            <span>${o.value ? formatCurrency(o.value) : ''}</span>
+            <span>${o.deadline ? formatDate(o.deadline) : ''}</span>
+          </div>
+          ${proveHtml}
+          ${advanceHtml}
         </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   });
 }
 
@@ -520,10 +608,23 @@ function renderOrdersCanceladas() {
 function advanceOrder(id) {
   const order = appData.orders.find(o => o.id === id);
   if (!order) return;
-  const stages = ['ideias', 'orcamento', 'aprovacao', 'material', 'producao', 'acabamento', 'pronto', 'entregue'];
+  const stages = ['orcamento', 'producao', 'prova', 'acabamento', 'pronto', 'entregue'];
   const idx = stages.indexOf(order.stage);
   if (idx < stages.length - 1) {
     order.stage = stages[idx + 1];
+    saveData(appData);
+    renderAll();
+  }
+}
+
+function allProvesDone(order) {
+  return order.provas && order.provas[0] && order.provas[1] && order.provas[2];
+}
+
+function toggleProva(orderId, index) {
+  const order = appData.orders.find(o => o.id === orderId);
+  if (order && order.provas) {
+    order.provas[index] = !order.provas[index];
     saveData(appData);
     renderAll();
   }

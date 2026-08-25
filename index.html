@@ -2,13 +2,20 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Ateliê da Kácia</title>
+    <meta name="description" content="Sistema de gestão para ateliê de costura">
+    <meta name="theme-color" content="#111111">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Ateliê Kácia">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.svg">
+    <link rel="icon" type="image/svg+xml" href="icon-192.svg">
     <link rel="stylesheet" href="./fonts/fonts.css">
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/drag-drop-touch@1.3.1/DragDropTouch.js"
-        integrity="sha384-UOr8GOWyKiLzQlTdZ+Tueea/UNAmUSm2bb0S4YhxI8uKDAOKw2YaBjmUZDavG7Fc"
-        crossorigin="anonymous"></script>
+    <script src="DragDropTouch.js"></script>
 </head>
 <body>
     <div class="app">
@@ -152,24 +159,16 @@
                     <button class="new-btn" onclick="openModal('modalNewOrder')">+ Nova encomenda</button>
                 </div>
                 <div class="kanban" id="kanbanBoard">
-                    <div class="column" data-stage="ideias" ondragover="event.preventDefault()" ondrop="dropCard(event, 'ideias')">
-                        <h4>💡 Ideias</h4>
-                        <div class="column-cards"></div>
-                    </div>
                     <div class="column" data-stage="orcamento" ondragover="event.preventDefault()" ondrop="dropCard(event, 'orcamento')">
                         <h4>📝 Orçamento</h4>
                         <div class="column-cards"></div>
                     </div>
-                    <div class="column" data-stage="aprovacao" ondragover="event.preventDefault()" ondrop="dropCard(event, 'aprovacao')">
-                        <h4>⏳ Aguardando aprovação</h4>
-                        <div class="column-cards"></div>
-                    </div>
-                    <div class="column" data-stage="material" ondragover="event.preventDefault()" ondrop="dropCard(event, 'material')">
-                        <h4>🧵 Aguardando material</h4>
-                        <div class="column-cards"></div>
-                    </div>
                     <div class="column" data-stage="producao" ondragover="event.preventDefault()" ondrop="dropCard(event, 'producao')">
-                        <h4>⚙️ Em produção</h4>
+                        <h4>⚙️ Produção</h4>
+                        <div class="column-cards"></div>
+                    </div>
+                    <div class="column" data-stage="prova" ondragover="event.preventDefault()" ondrop="dropCard(event, 'prova')">
+                        <h4>🪡 Prova</h4>
                         <div class="column-cards"></div>
                     </div>
                     <div class="column" data-stage="acabamento" ondragover="event.preventDefault()" ondrop="dropCard(event, 'acabamento')">
@@ -500,19 +499,6 @@
                 <input type="date" id="orderDeadline">
             </div>
             <div class="field">
-                <label>Etapa inicial</label>
-                <select id="orderStage">
-                    <option value="ideias">Ideias</option>
-                    <option value="orcamento">Orçamento</option>
-                    <option value="aprovacao">Aguardando aprovação</option>
-                    <option value="material">Aguardando material</option>
-                    <option value="producao">Em produção</option>
-                    <option value="acabamento">Acabamento</option>
-                    <option value="pronto">Pronto</option>
-                    <option value="entregue">Entregue</option>
-                </select>
-            </div>
-            <div class="field">
                 <label>Observações</label>
                 <input type="text" id="orderNotes" placeholder="Opcional">
             </div>
@@ -645,6 +631,64 @@
         </div>
     </div>
 
+    <!-- ==================== BOTTOM NAV (mobile) ==================== -->
+    <nav class="bottom-nav" id="bottomNav">
+        <button class="bottom-nav-item active" data-nav="dashboard" onclick="navigateTo('dashboard')">
+            <span class="bnav-icon">🏠</span>
+            <span>Início</span>
+        </button>
+        <button class="bottom-nav-item" data-nav="kanban" onclick="navigateTo('kanban')">
+            <span class="bnav-icon">📋</span>
+            <span>Kanban</span>
+        </button>
+        <button class="bottom-nav-item" data-nav="encomendas" onclick="navigateTo('encomendas-todas')">
+            <span class="bnav-icon">📦</span>
+            <span>Encomendas</span>
+        </button>
+        <button class="bottom-nav-item" data-nav="agenda" onclick="navigateTo('agenda-prazos')">
+            <span class="bnav-icon">📅</span>
+            <span>Agenda</span>
+        </button>
+        <button class="bottom-nav-item bottom-nav-mais" onclick="toggleMais()">
+            <span class="bnav-icon">•••</span>
+            <span>Mais</span>
+        </button>
+    </nav>
+
+    <!-- Quick Action Button (mobile) -->
+    <button class="fab" id="fabBtn" onclick="toggleFabMenu()">+</button>
+    <div class="fab-menu" id="fabMenu">
+        <button class="fab-option" onclick="openModal('modalNewOrder'); toggleFabMenu();">Nova Encomenda</button>
+        <button class="fab-option" onclick="openModal('modalNewClient'); toggleFabMenu();">Novo Cliente</button>
+        <button class="fab-option" onclick="openModal('modalNewMaterial'); toggleFabMenu();">Novo Material</button>
+    </div>
+
+    <!-- Mais overlay (mobile) -->
+    <div class="mais-overlay" id="maisOverlay" onclick="toggleMais()">
+        <div class="mais-panel" onclick="event.stopPropagation()">
+            <div class="mais-header">
+                <h3>Mais</h3>
+                <button class="mais-close" onclick="toggleMais()">✕</button>
+            </div>
+            <div class="mais-grid">
+                <button class="mais-item" onclick="navigateTo('clientes-cadastro')">
+                    <span class="mais-icon">👤</span> Clientes
+                </button>
+                <button class="mais-item" onclick="navigateTo('materiais-geral')">
+                    <span class="mais-icon">🧵</span> Materiais
+                </button>
+                <button class="mais-item" onclick="navigateTo('financeiro-receber')">
+                    <span class="mais-icon">💰</span> Financeiro
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script src="scripts.js"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js');
+      }
+    </script>
 </body>
 </html>

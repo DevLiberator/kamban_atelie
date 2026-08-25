@@ -64,6 +64,10 @@ body {
   }
 }
 
+@media (max-width: 767px) {
+  .sidebar { display: none; }
+}
+
 .logo h1 {
   font-family: "Playfair Display", serif;
   font-size: 20px;
@@ -183,6 +187,7 @@ body {
 
 .main {
   padding: 12px;
+  padding-bottom: 80px;
   overflow: auto;
   flex: 1;
   min-height: 0;
@@ -190,6 +195,20 @@ body {
 
 @media (min-width: 768px) {
   .main { padding: 20px 28px; }
+}
+
+@media (display-mode: standalone) {
+  .main {
+    padding-top: calc(12px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (min-width: 768px) and (display-mode: standalone) {
+  .main {
+    padding-top: calc(20px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 /* ========================= */
@@ -521,13 +540,13 @@ body {
 @media (min-width: 768px) {
   .kanban {
     display: grid;
-    grid-template-columns: repeat(4, minmax(200px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
 @media (min-width: 1100px) {
   .kanban {
-    grid-template-columns: repeat(8, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     overflow-x: visible;
     padding-bottom: 0;
   }
@@ -575,6 +594,39 @@ body {
   color: var(--muted);
 }
 
+.card-provas {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.prova-check {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.prova-check input[type="checkbox"] {
+  width: 13px;
+  height: 13px;
+  accent-color: var(--success);
+  cursor: pointer;
+}
+
+.prova-check:has(input:checked) span {
+  text-decoration: line-through;
+  color: var(--success);
+}
+
+.card-actions {
+  margin-top: 8px;
+}
+
 /* ========================= */
 /* STATUS BADGES             */
 /* ========================= */
@@ -588,11 +640,9 @@ body {
   white-space: nowrap;
 }
 
-.status-ideias { background: #e8e8e8; color: #555; }
 .status-orcamento { background: #e0f2ff; color: #0077cc; }
-.status-aprovacao { background: #fff4d6; color: #b07a00; }
-.status-material { background: #ffe8cc; color: #cc6600; }
 .status-producao { background: #ffe0e0; color: var(--danger); }
+.status-prova { background: #fff4d6; color: #b07a00; }
 .status-acabamento { background: #efe0ff; color: #6a00c4; }
 .status-pronto { background: #e2ffe5; color: var(--success); }
 .status-entregue { background: #d4edda; color: #155724; }
@@ -700,4 +750,220 @@ body {
 ::-webkit-scrollbar-thumb {
   background: #ccc;
   border-radius: 3px;
+}
+
+/* ========================= */
+/* BOTTOM NAV (mobile)       */
+/* ========================= */
+
+.bottom-nav {
+  display: none;
+}
+
+.fab,
+.fab-menu,
+.mais-overlay {
+  display: none;
+}
+
+@media (max-width: 767px) {
+
+  .bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border-top: 1px solid var(--border);
+    z-index: 90;
+    padding: 6px 0 env(safe-area-inset-bottom, 6px);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.06);
+  }
+
+  .bottom-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    background: none;
+    border: none;
+    padding: 6px 2px 4px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 10px;
+    color: var(--muted);
+    transition: color 0.15s;
+  }
+
+  .bottom-nav-item.active {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .bnav-icon {
+    font-size: 20px;
+    line-height: 1;
+  }
+
+  .bottom-nav-mais .bnav-icon {
+    font-size: 16px;
+    letter-spacing: 1px;
+    font-weight: 700;
+  }
+
+  /* FAB */
+
+  .fab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    bottom: 68px;
+    right: 16px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    font-size: 26px;
+    font-weight: 300;
+    cursor: pointer;
+    z-index: 91;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.25);
+    transition: transform 0.2s, background 0.15s;
+  }
+
+  .fab:hover {
+    background: var(--accent-hover);
+  }
+
+  .fab:active {
+    transform: scale(0.92);
+  }
+
+  .fab-menu {
+    position: fixed;
+    bottom: 126px;
+    right: 16px;
+    z-index: 92;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+    pointer-events: none;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+
+  .fab-menu.open {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+
+  .fab-option {
+    background: #fff;
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: background 0.15s;
+    text-align: right;
+  }
+
+  .fab-option:hover {
+    background: #f2f0ed;
+  }
+
+  /* MAIS OVERLAY */
+
+  .mais-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    z-index: 95;
+    display: flex;
+    align-items: flex-end;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+  }
+
+  .mais-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .mais-panel {
+    width: 100%;
+    background: #fff;
+    border-radius: 18px 18px 0 0;
+    padding: 20px 20px calc(20px + env(safe-area-inset-bottom, 0px));
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .mais-overlay.open .mais-panel {
+    transform: translateY(0);
+  }
+
+  .mais-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+
+  .mais-header h3 {
+    font-family: "Playfair Display", serif;
+    font-size: 18px;
+  }
+
+  .mais-close {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: var(--muted);
+    padding: 4px;
+  }
+
+  .mais-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .mais-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    transition: background 0.15s;
+  }
+
+  .mais-item:hover {
+    background: #ece9e4;
+  }
+
+  .mais-icon {
+    font-size: 20px;
+  }
 }
