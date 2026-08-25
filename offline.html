@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Ateliê da Kácia — Offline</title>
+    <meta name="theme-color" content="#111111">
+    <link rel="stylesheet" href="./fonts/fonts.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Inter, sans-serif;
+            background: #f4f1ec;
+            color: #111;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .offline-card {
+            background: #fff;
+            border: 1px solid #ddd7d1;
+            border-radius: 16px;
+            padding: 40px 32px;
+            max-width: 420px;
+            text-align: center;
+        }
+        .offline-icon {
+            font-size: 56px;
+            margin-bottom: 16px;
+        }
+        h1 {
+            font-family: "Playfair Display", serif;
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+        p {
+            font-size: 14px;
+            color: #777;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .offline-features {
+            text-align: left;
+            margin: 16px 0 24px;
+            padding: 16px;
+            background: #f4f1ec;
+            border-radius: 12px;
+        }
+        .offline-features h3 {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #444;
+        }
+        .offline-features li {
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 6px;
+            list-style: none;
+            padding-left: 20px;
+            position: relative;
+        }
+        .offline-features li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #0a7a1f;
+            font-weight: 700;
+        }
+        .retry-btn {
+            display: inline-block;
+            padding: 12px 28px;
+            background: #111;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .retry-btn:hover { background: #333; }
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #c40000;
+            margin-right: 6px;
+        }
+        .status-text {
+            font-size: 12px;
+            color: #c40000;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-card">
+        <div class="offline-icon">📡</div>
+        <h1>Ateliê da Kácia</h1>
+        <p><span class="status-dot"></span><span class="status-text">Sem conexão com a internet</span></p>
+        <p>Não se preocupe! Seus dados estão salvos no navegador. O sistema continua funcionando normalmente offline.</p>
+
+        <div class="offline-features">
+            <h3>O que funciona offline:</h3>
+            <ul>
+                <li>Ver e editar encomendas</li>
+                <li>Gerenciar kanban</li>
+                <li>Cadastrar clientes</li>
+                <li>Controlar estoque</li>
+                <li>Agendar compromissos</li>
+                <li>Registrar despesas</li>
+            </ul>
+        </div>
+
+        <button class="retry-btn" onclick="location.href='./index.html'">Abrir o Sistema</button>
+    </div>
+
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js');
+      }
+      window.addEventListener('online', function() {
+        location.href = './index.html';
+      });
+    </script>
+</body>
+</html>

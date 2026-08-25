@@ -35,12 +35,57 @@ function migrateOrders(data) {
 
 function saveData(data) {
   localStorage.setItem(STORE_KEY, JSON.stringify(data));
+  if (!isOnline) {
+    addToSyncQueue({ type: 'save', key: STORE_KEY });
+  }
 }
 
 let appData = loadData();
 
 function genId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+/* ========================= */
+/* ONLINE / OFFLINE          */
+/* ========================= */
+
+const SYNC_KEY = 'atelie_kacia_sync_queue';
+let isOnline = navigator.onLine;
+
+function getSyncQueue() {
+  try { return JSON.parse(localStorage.getItem(SYNC_KEY)) || []; }
+  catch { return []; }
+}
+
+function addToSyncQueue(action) {
+  const queue = getSyncQueue();
+  queue.push({ ...action, timestamp: new Date().toISOString() });
+  localStorage.setItem(SYNC_KEY, JSON.stringify(queue));
+}
+
+function processSyncQueue() {
+  const queue = getSyncQueue();
+  if (queue.length === 0) return;
+  localStorage.removeItem(SYNC_KEY);
+  showToast(queue.length + ' ação(ões) sincronizada(s)!');
+}
+
+function updateOnlineStatus() {
+  isOnline = navigator.onLine;
+  const banner = document.getElementById('offlineBanner');
+  if (banner) {
+    banner.classList.toggle('visible', !isOnline);
+  }
+  if (isOnline) {
+    processSyncQueue();
+  }
+}
+
+function setupOfflineDetection() {
+  window.addEventListener('online', updateOnlineStatus);
+  window.addEventListener('offline', updateOnlineStatus);
+  updateOnlineStatus();
 }
 
 /* ========================= */
@@ -125,12 +170,19 @@ function openModal(id, preset) {
   const modal = document.getElementById(id);
   if (modal) {
     modal.classList.add('open');
-    if (id === 'modalNewMaterial' && preset) {
-      document.getElementById('matCategory').value = preset;
-      toggleMatColorField();
+    if (id === 'modalNewOrder') clearOrderForm();
+    if (id === 'modalNewClient') clearClientForm();
+    if (id === 'modalNewMaterial') {
+      clearMaterialForm();
+      if (preset) {
+        document.getElementById('matCategory').value = preset;
+        toggleMatColorField();
+      }
     }
-    if (id === 'modalNewAgenda' && preset) {
-      appData._agendaType = preset;
+    if (id === 'modalNewDespesa') clearDespesaForm();
+    if (id === 'modalNewAgenda') {
+      clearAgendaForm();
+      if (preset) appData._agendaType = preset;
     }
   }
 }
@@ -145,6 +197,26 @@ document.addEventListener('click', function(e) {
     e.target.classList.remove('open');
   }
 });
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal.open').forEach(m => m.classList.remove('open'));
+  }
+});
+
+function showToast(msg) {
+  const existing = document.querySelector('.toast');
+  if (existing) existing.remove();
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add('show'));
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 300);
+  }, 2000);
+}
 
 /* ========================= */
 /* STAGE LABELS              */
@@ -200,6 +272,7 @@ function saveOrder() {
   closeModal('modalNewOrder');
   clearOrderForm();
   renderAll();
+  showToast('Encomenda salva com sucesso!');
 }
 
 function clearOrderForm() {
@@ -214,6 +287,9 @@ function moveOrder(id, newStage) {
   const order = appData.orders.find(o => o.id === id);
   if (order) {
     order.stage = newStage;
+    if (newStage === 'entregue') {
+      order.deliveredAt = new Date().toISOString();
+    }
     saveData(appData);
     renderAll();
   }
@@ -224,6 +300,7 @@ function deleteOrder(id) {
   appData.orders = appData.orders.filter(o => o.id !== id);
   saveData(appData);
   renderAll();
+  showToast('Encomenda excluída.');
 }
 
 /* ========================= */
@@ -241,6 +318,7 @@ function dragCard(e, id) {
 
 function dropCard(e, stage) {
   e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
   if (draggedId) {
     moveOrder(draggedId, stage);
     draggedId = null;
@@ -275,6 +353,7 @@ function saveClient() {
   closeModal('modalNewClient');
   clearClientForm();
   renderAll();
+  showToast('Cliente salvo com sucesso!');
 }
 
 function clearClientForm() {
@@ -289,6 +368,7 @@ function deleteClient(id) {
   appData.clients = appData.clients.filter(c => c.id !== id);
   saveData(appData);
   renderAll();
+  showToast('Cliente excluído.');
 }
 
 /* ========================= */
@@ -330,6 +410,7 @@ function saveMaterial() {
   closeModal('modalNewMaterial');
   clearMaterialForm();
   renderAll();
+  showToast('Material salvo com sucesso!');
 }
 
 function clearMaterialForm() {
@@ -348,6 +429,7 @@ function deleteMaterial(id) {
   appData.materials = appData.materials.filter(m => m.id !== id);
   saveData(appData);
   renderAll();
+  showToast('Material excluído.');
 }
 
 /* ========================= */
@@ -379,6 +461,7 @@ function saveAgenda() {
   closeModal('modalNewAgenda');
   clearAgendaForm();
   renderAll();
+  showToast('Item adicionado à agenda!');
 }
 
 function clearAgendaForm() {
@@ -392,6 +475,7 @@ function deleteAgenda(type, id) {
   appData.agenda[type] = appData.agenda[type].filter(a => a.id !== id);
   saveData(appData);
   renderAll();
+  showToast('Item removido da agenda.');
 }
 
 /* ========================= */
@@ -421,6 +505,7 @@ function saveDespesa() {
   closeModal('modalNewDespesa');
   clearDespesaForm();
   renderAll();
+  showToast('Despesa registrada!');
 }
 
 function clearDespesaForm() {
@@ -435,6 +520,7 @@ function deleteDespesa(id) {
   appData.despesas = appData.despesas.filter(d => d.id !== id);
   saveData(appData);
   renderAll();
+  showToast('Despesa excluída.');
 }
 
 /* ========================= */
@@ -482,13 +568,22 @@ function renderDashboard() {
     return d >= today && d <= next7;
   });
   const receber = appData.orders.filter(o => !['entregue', 'cancelado'].includes(o.stage));
+  const estoqueBaixo = appData.materials.filter(m => m.minStock > 0 && m.quantity <= m.minStock);
 
   document.getElementById('stat-andamento').textContent = andamento.length;
   document.getElementById('stat-prazos').textContent = prazos.length;
 
   const totalReceber = receber.reduce((s, o) => s + (o.value || 0), 0);
   document.getElementById('stat-receber').textContent = formatCurrency(totalReceber);
-  document.getElementById('stat-tarefas').textContent = andamento.length;
+
+  const estoqueEl = document.getElementById('stat-estoqueDash');
+  if (estoqueEl) {
+    estoqueEl.textContent = estoqueBaixo.length;
+    const estoqueCard = estoqueEl.closest('.card');
+    if (estoqueCard) {
+      estoqueCard.classList.toggle('alert-card', estoqueBaixo.length > 0);
+    }
+  }
 
   const andamentoEl = document.getElementById('dashboard-andamento');
   if (andamento.length) {
@@ -515,12 +610,31 @@ function renderDashboard() {
   } else {
     prazosEl.innerHTML = '<p class="empty-msg">Nenhum prazo próximo.</p>';
   }
+
+  const estoqueDashboardEl = document.getElementById('dashboard-estoque');
+  if (estoqueDashboardEl) {
+    if (estoqueBaixo.length) {
+      estoqueDashboardEl.innerHTML = estoqueBaixo.map(m => `
+        <div class="order-card" style="margin-bottom:8px; border-left: 3px solid #f5c542;">
+          <strong>${m.name}${m.color ? ' (' + m.color + ')' : ''}</strong>
+          <p>${m.quantity} ${m.unit} disponível — mínimo: ${m.minStock} ${m.unit}</p>
+          <div class="card-meta"><span class="status status-orcamento">${m.category}</span></div>
+        </div>
+      `).join('');
+    } else {
+      estoqueDashboardEl.innerHTML = '<p class="empty-msg">Estoque adequado.</p>';
+    }
+  }
 }
 
 /* --- Kanban --- */
 
 function renderKanban() {
   const columns = document.querySelectorAll('.column');
+  const today = new Date();
+  const warn3 = new Date(today);
+  warn3.setDate(warn3.getDate() + 3);
+
   columns.forEach(col => {
     const stage = col.dataset.stage;
     const cardsContainer = col.querySelector('.column-cards');
@@ -545,13 +659,21 @@ function renderKanban() {
         advanceHtml = '<div class="card-actions"><button class="btn-sm" onclick="event.stopPropagation(); advanceOrder(\'' + o.id + '\')">Avançar → Acabamento</button></div>';
       }
 
+      let deadlineHtml = '';
+      if (o.deadline) {
+        const d = new Date(o.deadline);
+        const isUrgent = d <= warn3 && !['entregue', 'cancelado'].includes(o.stage);
+        const isPast = d < today && !['entregue', 'cancelado'].includes(o.stage);
+        deadlineHtml = `<span style="${isPast ? 'color:#c40000;font-weight:600' : isUrgent ? 'color:#cc6600;font-weight:600' : ''}">${formatDate(o.deadline)}${isPast ? ' ⚠️' : isUrgent ? ' ⏰' : ''}</span>`;
+      }
+
       return `
         <div class="order-card" draggable="true" ondragstart="dragCard(event, '${o.id}')">
           <strong>${o.description}</strong>
           <p>${getClientName(o.clientId)}</p>
           <div class="card-meta">
             <span>${o.value ? formatCurrency(o.value) : ''}</span>
-            <span>${o.deadline ? formatDate(o.deadline) : ''}</span>
+            ${deadlineHtml}
           </div>
           ${proveHtml}
           ${advanceHtml}
@@ -612,8 +734,12 @@ function advanceOrder(id) {
   const idx = stages.indexOf(order.stage);
   if (idx < stages.length - 1) {
     order.stage = stages[idx + 1];
+    if (order.stage === 'entregue') {
+      order.deliveredAt = new Date().toISOString();
+    }
     saveData(appData);
     renderAll();
+    showToast('Etapa avançada para: ' + stageLabel(order.stage));
   }
 }
 
@@ -637,6 +763,27 @@ function filterOrders(query) {
     return o.description.toLowerCase().includes(q) || client.includes(q);
   });
   renderOrdersTable('ordersBody', filtered, true);
+}
+
+function filterClients(query) {
+  const q = query.toLowerCase();
+  const filtered = appData.clients.filter(c =>
+    c.name.toLowerCase().includes(q) ||
+    (c.phone && c.phone.toLowerCase().includes(q)) ||
+    (c.email && c.email.toLowerCase().includes(q))
+  );
+  const tbody = document.getElementById('clientsBody');
+  if (!tbody) return;
+  tbody.innerHTML = filtered.map(c => `
+    <tr>
+      <td>${c.name}</td>
+      <td>${c.phone || '-'}</td>
+      <td>${c.email || '-'}</td>
+      <td class="actions">
+        <button class="btn-sm btn-danger-sm" onclick="deleteClient('${c.id}')">Excluir</button>
+      </td>
+    </tr>
+  `).join('');
 }
 
 /* --- Clients --- */
@@ -713,7 +860,6 @@ function renderMaterialTable(bodyId, items, showActions) {
   tbody.innerHTML = items.map(m => `
     <tr>
       <td>${m.name}${m.color ? ' (' + m.color + ')' : ''}</td>
-      ${m.category === 'tecido' ? '' : ''}
       <td>${m.quantity}</td>
       <td>${m.unit}</td>
       <td>${formatCurrency(m.price)}</td>
@@ -802,8 +948,9 @@ function renderFinanceiro() {
 
   const entreguesMes = appData.orders.filter(o => {
     if (o.stage !== 'entregue') return false;
-    if (!o.createdAt) return false;
-    const d = new Date(o.createdAt);
+    const dateField = o.deliveredAt || o.createdAt;
+    if (!dateField) return false;
+    const d = new Date(dateField);
     return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
   });
   const totalRecebidoMes = entreguesMes.reduce((s, o) => s + (o.value || 0), 0);
@@ -855,7 +1002,7 @@ function renderFinanceiro() {
         <td>${getClientName(o.clientId)}</td>
         <td>${o.description}</td>
         <td>${formatCurrency(o.value)}</td>
-        <td>${o.createdAt ? new Date(o.createdAt).toLocaleDateString('pt-BR') : '-'}</td>
+        <td>${o.deliveredAt ? new Date(o.deliveredAt).toLocaleDateString('pt-BR') : (o.createdAt ? new Date(o.createdAt).toLocaleDateString('pt-BR') : '-')}</td>
       </tr>
     `).join('');
   }
@@ -880,4 +1027,5 @@ function renderFinanceiro() {
 /* INIT                      */
 /* ========================= */
 
+setupOfflineDetection();
 renderAll();

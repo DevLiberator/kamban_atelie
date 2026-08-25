@@ -1,7 +1,8 @@
-const CACHE_NAME = 'atelie-v1';
+const CACHE_NAME = 'atelie-v2';
 const ASSETS = [
   './',
   './index.html',
+  './offline.html',
   './style.css',
   './scripts.js',
   './DragDropTouch.js',
@@ -46,7 +47,7 @@ self.addEventListener('fetch', event => {
         return response;
       }).catch(() => {
         if (event.request.mode === 'navigate') {
-          return caches.match('./index.html');
+          return caches.match('./offline.html');
         }
       });
     })

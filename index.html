@@ -18,6 +18,10 @@
     <script src="DragDropTouch.js"></script>
 </head>
 <body>
+    <div class="offline-banner" id="offlineBanner">
+        <span class="offline-banner-dot"></span>
+        Você está offline — os dados são salvos localmente
+    </div>
     <div class="app">
         <!-- SIDEBAR -->
         <aside class="sidebar" id="sidebar">
@@ -136,8 +140,8 @@
                         <strong id="stat-receber">R$ 0,00</strong>
                     </div>
                     <div class="card">
-                        <span>Tarefas pendentes</span>
-                        <strong id="stat-tarefas">0</strong>
+                        <span>Estoque baixo</span>
+                        <strong id="stat-estoqueDash">0</strong>
                     </div>
                 </div>
 
@@ -150,6 +154,11 @@
                 <div class="list-area" id="dashboard-prazos">
                     <p class="empty-msg">Nenhum prazo próximo.</p>
                 </div>
+
+                <div class="section-title">⚠️ Estoque baixo</div>
+                <div class="list-area" id="dashboard-estoque">
+                    <p class="empty-msg">Estoque adequado.</p>
+                </div>
             </section>
 
             <!-- ==================== KANBAN ==================== -->
@@ -159,27 +168,27 @@
                     <button class="new-btn" onclick="openModal('modalNewOrder')">+ Nova encomenda</button>
                 </div>
                 <div class="kanban" id="kanbanBoard">
-                    <div class="column" data-stage="orcamento" ondragover="event.preventDefault()" ondrop="dropCard(event, 'orcamento')">
+                    <div class="column" data-stage="orcamento" ondragover="event.preventDefault()" ondragenter="this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="dropCard(event, 'orcamento')">
                         <h4>📝 Orçamento</h4>
                         <div class="column-cards"></div>
                     </div>
-                    <div class="column" data-stage="producao" ondragover="event.preventDefault()" ondrop="dropCard(event, 'producao')">
+                    <div class="column" data-stage="producao" ondragover="event.preventDefault()" ondragenter="this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="dropCard(event, 'producao')">
                         <h4>⚙️ Produção</h4>
                         <div class="column-cards"></div>
                     </div>
-                    <div class="column" data-stage="prova" ondragover="event.preventDefault()" ondrop="dropCard(event, 'prova')">
+                    <div class="column" data-stage="prova" ondragover="event.preventDefault()" ondragenter="this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="dropCard(event, 'prova')">
                         <h4>🪡 Prova</h4>
                         <div class="column-cards"></div>
                     </div>
-                    <div class="column" data-stage="acabamento" ondragover="event.preventDefault()" ondrop="dropCard(event, 'acabamento')">
+                    <div class="column" data-stage="acabamento" ondragover="event.preventDefault()" ondragenter="this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="dropCard(event, 'acabamento')">
                         <h4>✂️ Acabamento</h4>
                         <div class="column-cards"></div>
                     </div>
-                    <div class="column" data-stage="pronto" ondragover="event.preventDefault()" ondrop="dropCard(event, 'pronto')">
+                    <div class="column" data-stage="pronto" ondragover="event.preventDefault()" ondragenter="this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="dropCard(event, 'pronto')">
                         <h4>✅ Pronto</h4>
                         <div class="column-cards"></div>
                     </div>
-                    <div class="column" data-stage="entregue" ondragover="event.preventDefault()" ondrop="dropCard(event, 'entregue')">
+                    <div class="column" data-stage="entregue" ondragover="event.preventDefault()" ondragenter="this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="dropCard(event, 'entregue')">
                         <h4>🚚 Entregue</h4>
                         <div class="column-cards"></div>
                     </div>
@@ -254,7 +263,7 @@
             <section class="page" id="page-clientes-cadastro">
                 <div class="topbar">
                     <h2>👤 Cadastro de Clientes</h2>
-                    <input type="text" id="searchClient" placeholder="Buscar cliente...">
+                    <input type="text" id="searchClient" placeholder="Buscar cliente..." oninput="filterClients(this.value)">
                     <button class="new-btn" onclick="openModal('modalNewClient')">+ Novo cliente</button>
                 </div>
                 <div class="table-area">
@@ -687,7 +696,18 @@
     <script src="scripts.js"></script>
     <script>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js');
+        navigator.serviceWorker.register('./sw.js').then(reg => {
+          reg.addEventListener('updatefound', () => {
+            const newWorker = reg.installing;
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'activated') {
+                if (confirm('Atualização disponível! Deseja recarregar?')) {
+                  location.reload();
+                }
+              }
+            });
+          });
+        });
       }
     </script>
 </body>
