@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ateliê da Kácia</title>
+    <link rel="stylesheet" href="./fonts/fonts.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/drag-drop-touch@1.3.1/DragDropTouch.js"
+        integrity="sha384-UOr8GOWyKiLzQlTdZ+Tueea/UNAmUSm2bb0S4YhxI8uKDAOKw2YaBjmUZDavG7Fc"
+        crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="app">
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+            <div class="logo">
+                <h1>Ateliê da Kácia</h1>
+                <p>Sistema de Gestão</p>
+            </div>
+
+            <nav class="menu">
+                <!-- DASHBOARD -->
+                <button class="menu-item active" data-page="dashboard" onclick="navigateTo('dashboard')">
+                    <span class="menu-icon">🏠</span> Dashboard
+                </button>
+
+                <!-- KANBAN -->
+                <div class="menu-group">
+                    <button class="menu-item" data-toggle="kanban-sub" onclick="toggleSubmenu('kanban-sub')">
+                        <span class="menu-icon">📋</span> Kanban
+                        <span class="arrow">▾</span>
+                    </button>
+                    <div class="submenu open" id="kanban-sub">
+                        <button class="submenu-item active-sub" data-page="kanban" onclick="navigateTo('kanban')">Quadro Kanban</button>
+                    </div>
+                </div>
+
+                <!-- ENCOMENDAS -->
+                <div class="menu-group">
+                    <button class="menu-item" data-toggle="encomendas-sub" onclick="toggleSubmenu('encomendas-sub')">
+                        <span class="menu-icon">📦</span> Encomendas
+                        <span class="arrow">▾</span>
+                    </button>
+                    <div class="submenu" id="encomendas-sub">
+                        <button class="submenu-item" data-page="encomendas-todas" onclick="navigateTo('encomendas-todas')">Todas</button>
+                        <button class="submenu-item" data-page="encomendas-andamento" onclick="navigateTo('encomendas-andamento')">Em andamento</button>
+                        <button class="submenu-item" data-page="encomendas-entregues" onclick="navigateTo('encomendas-entregues')">Entregues</button>
+                        <button class="submenu-item" data-page="encomendas-canceladas" onclick="navigateTo('encomendas-canceladas')">Canceladas</button>
+                    </div>
+                </div>
+
+                <!-- CLIENTES -->
+                <div class="menu-group">
+                    <button class="menu-item" data-toggle="clientes-sub" onclick="toggleSubmenu('clientes-sub')">
+                        <span class="menu-icon">👤</span> Clientes
+                        <span class="arrow">▾</span>
+                    </button>
+                    <div class="submenu" id="clientes-sub">
+                        <button class="submenu-item" data-page="clientes-cadastro" onclick="navigateTo('clientes-cadastro')">Cadastro</button>
+                        <button class="submenu-item" data-page="clientes-historico" onclick="navigateTo('clientes-historico')">Histórico</button>
+                        <button class="submenu-item" data-page="clientes-contatos" onclick="navigateTo('clientes-contatos')">Contatos</button>
+                    </div>
+                </div>
+
+                <!-- MATERIAIS / ESTOQUE -->
+                <div class="menu-group">
+                    <button class="menu-item" data-toggle="materiais-sub" onclick="toggleSubmenu('materiais-sub')">
+                        <span class="menu-icon">🧵</span> Materiais / Estoque
+                        <span class="arrow">▾</span>
+                    </button>
+                    <div class="submenu" id="materiais-sub">
+                        <button class="submenu-item" data-page="materiais-tecidos" onclick="navigateTo('materiais-tecidos')">Tecidos</button>
+                        <button class="submenu-item" data-page="materiais-aviamentos" onclick="navigateTo('materiais-aviamentos')">Aviamentos</button>
+                        <button class="submenu-item" data-page="materiais-geral" onclick="navigateTo('materiais-geral')">Materiais</button>
+                        <button class="submenu-item" data-page="materiais-estoque-baixo" onclick="navigateTo('materiais-estoque-baixo')">Estoque baixo</button>
+                    </div>
+                </div>
+
+                <!-- AGENDA -->
+                <div class="menu-group">
+                    <button class="menu-item" data-toggle="agenda-sub" onclick="toggleSubmenu('agenda-sub')">
+                        <span class="menu-icon">📅</span> Agenda
+                        <span class="arrow">▾</span>
+                    </button>
+                    <div class="submenu" id="agenda-sub">
+                        <button class="submenu-item" data-page="agenda-prazos" onclick="navigateTo('agenda-prazos')">Prazos de entrega</button>
+                        <button class="submenu-item" data-page="agenda-retiradas" onclick="navigateTo('agenda-retiradas')">Retiradas</button>
+                        <button class="submenu-item" data-page="agenda-compras" onclick="navigateTo('agenda-compras')">Compras</button>
+                        <button class="submenu-item" data-page="agenda-compromissos" onclick="navigateTo('agenda-compromissos')">Compromissos</button>
+                    </div>
+                </div>
+
+                <!-- FINANCEIRO -->
+                <div class="menu-group">
+                    <button class="menu-item" data-toggle="financeiro-sub" onclick="toggleSubmenu('financeiro-sub')">
+                        <span class="menu-icon">💰</span> Financeiro
+                        <span class="arrow">▾</span>
+                    </button>
+                    <div class="submenu" id="financeiro-sub">
+                        <button class="submenu-item" data-page="financeiro-receber" onclick="navigateTo('financeiro-receber')">A receber</button>
+                        <button class="submenu-item" data-page="financeiro-recebido" onclick="navigateTo('financeiro-recebido')">Recebido</button>
+                        <button class="submenu-item" data-page="financeiro-despesas" onclick="navigateTo('financeiro-despesas')">Despesas</button>
+                        <button class="submenu-item" data-page="financeiro-lucro" onclick="navigateTo('financeiro-lucro')">Lucro</button>
+                    </div>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main" id="mainContent">
+
+            <!-- ==================== DASHBOARD ==================== -->
+            <section class="page active" id="page-dashboard">
+                <div class="topbar">
+                    <h2>🏠 Dashboard</h2>
+                </div>
+                <div class="cards">
+                    <div class="card">
+                        <span>Encomendas em andamento</span>
+                        <strong id="stat-andamento">0</strong>
+                    </div>
+                    <div class="card">
+                        <span>Prazos próximos (7 dias)</span>
+                        <strong id="stat-prazos">0</strong>
+                    </div>
+                    <div class="card">
+                        <span>Valores a receber</span>
+                        <strong id="stat-receber">R$ 0,00</strong>
+                    </div>
+                    <div class="card">
+                        <span>Tarefas pendentes</span>
+                        <strong id="stat-tarefas">0</strong>
+                    </div>
+                </div>
+
+                <div class="section-title">Encomendas em andamento</div>
+                <div class="list-area" id="dashboard-andamento">
+                    <p class="empty-msg">Nenhuma encomenda em andamento.</p>
+                </div>
+
+                <div class="section-title">Prazos próximos</div>
+                <div class="list-area" id="dashboard-prazos">
+                    <p class="empty-msg">Nenhum prazo próximo.</p>
+                </div>
+            </section>
+
+            <!-- ==================== KANBAN ==================== -->
+            <section class="page" id="page-kanban">
+                <div class="topbar">
+                    <h2>📋 Kanban</h2>
+                    <button class="new-btn" onclick="openModal('modalNewOrder')">+ Nova encomenda</button>
+                </div>
+                <div class="kanban" id="kanbanBoard">
+                    <div class="column" data-stage="ideias" ondragover="event.preventDefault()" ondrop="dropCard(event, 'ideias')">
+                        <h4>💡 Ideias</h4>
+                        <div class="column-cards"></div>
+                    </div>
+                    <div class="column" data-stage="orcamento" ondragover="event.preventDefault()" ondrop="dropCard(event, 'orcamento')">
+                        <h4>📝 Orçamento</h4>
+                        <div class="column-cards"></div>
+                    </div>
+                    <div class="column" data-stage="aprovacao" ondragover="event.preventDefault()" ondrop="dropCard(event, 'aprovacao')">
+                        <h4>⏳ Aguardando aprovação</h4>
+                        <div class="column-cards"></div>
+                    </div>
+                    <div class="column" data-stage="material" ondragover="event.preventDefault()" ondrop="dropCard(event, 'material')">
+                        <h4>🧵 Aguardando material</h4>
+                        <div class="column-cards"></div>
+                    </div>
+                    <div class="column" data-stage="producao" ondragover="event.preventDefault()" ondrop="dropCard(event, 'producao')">
+                        <h4>⚙️ Em produção</h4>
+                        <div class="column-cards"></div>
+                    </div>
+                    <div class="column" data-stage="acabamento" ondragover="event.preventDefault()" ondrop="dropCard(event, 'acabamento')">
+                        <h4>✂️ Acabamento</h4>
+                        <div class="column-cards"></div>
+                    </div>
+                    <div class="column" data-stage="pronto" ondragover="event.preventDefault()" ondrop="dropCard(event, 'pronto')">
+                        <h4>✅ Pronto</h4>
+                        <div class="column-cards"></div>
+                    </div>
+                    <div class="column" data-stage="entregue" ondragover="event.preventDefault()" ondrop="dropCard(event, 'entregue')">
+                        <h4>🚚 Entregue</h4>
+                        <div class="column-cards"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== ENCOMENDAS ==================== -->
+            <section class="page" id="page-encomendas-todas">
+                <div class="topbar">
+                    <h2>📦 Todas as Encomendas</h2>
+                    <input type="text" id="searchOrder" placeholder="Buscar encomenda..." oninput="filterOrders(this.value)">
+                    <button class="new-btn" onclick="openModal('modalNewOrder')">+ Nova</button>
+                </div>
+                <div class="table-area">
+                    <table class="data-table" id="tableOrders">
+                        <thead>
+                            <tr>
+                                <th>Cliente</th>
+                                <th>Descrição</th>
+                                <th>Valor</th>
+                                <th>Prazo</th>
+                                <th>Etapa</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersBody"></tbody>
+                    </table>
+                    <p class="empty-msg" id="noOrders">Nenhuma encomenda cadastrada.</p>
+                </div>
+            </section>
+
+            <section class="page" id="page-encomendas-andamento">
+                <div class="topbar">
+                    <h2>📦 Em Andamento</h2>
+                </div>
+                <div class="table-area">
+                    <table class="data-table">
+                        <thead><tr><th>Cliente</th><th>Descrição</th><th>Valor</th><th>Prazo</th><th>Etapa</th></tr></thead>
+                        <tbody id="ordersAndamento"></tbody>
+                    </table>
+                    <p class="empty-msg">Nenhuma encomenda em andamento.</p>
+                </div>
+            </section>
+
+            <section class="page" id="page-encomendas-entregues">
+                <div class="topbar">
+                    <h2>📦 Entregues</h2>
+                </div>
+                <div class="table-area">
+                    <table class="data-table">
+                        <thead><tr><th>Cliente</th><th>Descrição</th><th>Valor</th><th>Data entrega</th></tr></thead>
+                        <tbody id="ordersEntregues"></tbody>
+                    </table>
+                    <p class="empty-msg">Nenhuma encomenda entregue.</p>
+                </div>
+            </section>
+
+            <section class="page" id="page-encomendas-canceladas">
+                <div class="topbar">
+                    <h2>📦 Canceladas</h2>
+                </div>
+                <div class="table-area">
+                    <table class="data-table">
+                        <thead><tr><th>Cliente</th><th>Descrição</th><th>Motivo</th></tr></thead>
+                        <tbody id="ordersCanceladas"></tbody>
+                    </table>
+                    <p class="empty-msg">Nenhuma encomenda cancelada.</p>
+                </div>
+            </section>
+
+            <!-- ==================== CLIENTES ==================== -->
+            <section class="page" id="page-clientes-cadastro">
+                <div class="topbar">
+                    <h2>👤 Cadastro de Clientes</h2>
+                    <input type="text" id="searchClient" placeholder="Buscar cliente...">
+                    <button class="new-btn" onclick="openModal('modalNewClient')">+ Novo cliente</button>
+                </div>
+                <div class="table-area">
+                    <table class="data-table">
+                        <thead><tr><th>Nome</th><th>Telefone</th><th>Email</th><th>Ações</th></tr></thead>
+                        <tbody id="clientsBody"></tbody>
+                    </table>
+                    <p class="empty-msg" id="noClients">Nenhum cliente cadastrado.</p>
+                </div>
+            </section>
+
+            <section class="page" id="page-clientes-historico">
+                <div class="topbar">
+                    <h2>👤 Histórico de Encomendas</h2>
+                </div>
+                <div class="table-area">
+                    <table class="data-table">
+                        <thead><tr><th>Cliente</th><th>Descrição</th><th>Valor</th><th>Data</th><th>Status</th></tr></thead>
+                        <tbody id="historyBody"></tbody>
+                    </table>
+                    <p class="empty-msg">Nenhum histórico disponível.</p>
+                </div>
+            </section>
+
+            <section class="page" id="page-clientes-contatos">
+                <div class="topbar">
+                    <h2>👤 Contatos</h2>
+                </div>
+                <div class="contacts-grid" id="contactsGrid">
+                    <p class="empty-msg">Nenhum contato cadastrado.</p>
+                </div>
+            </section>
+
+            <!-- ==================== MATERIAIS / ESTOQUE ==================== -->
+            <section class="page" id="page-materiais-tecidos">
+                <div class="topbar">
+                    <h2>🧵 Tecidos</h2>
+                    <button class="new-btn" onclick="openModal('modalNewMaterial', 'tecido')">+ Novo tecido</button>
+                </div>
+                <div class="table-area">
+                    <table class="data-table">
+                        <thead><tr><th>Nome</th><th>Cor</th><th>Quantidade</th><th>Unidade</th><th>Preço/m</th><th>Ações</th></tr></thead>
+                        <tbody id="tecidosBody"></tbody>
+                    </table>
+                    <p class="empty-msg">Nenhum tecido cadastrado.</p>
+                </div>
+            </section>
+
+            <section class="page" id="page-materiais-aviamentos">
+                <div class="topbar">
+                    <h2>🧵 Aviamentos</h2>
+                    <button class="new-btn" onclick="openModal('modalNewMaterial', 'aviamento')">+ Novo aviamento</button>
+                </div>
+                <div class="table-area">
+                    <table class="data-table">
+                        <thead><tr><th>Nome</th><th>Quantidade</th><th>Unidade</th><th>Preço</th><th>Ações</th></tr></thead>
+                        <tbody id="aviamentosBody"></tbody>
+                    </table>
+                    <p class="empty-msg">Nenhum aviamento cadastrado.</p>
+                </div>
+            </section>
+
+            <section class="page" id="page-materiais-geral">
+                <div class="topbar">
+                    <h2>🧵 Materiais</h2>
+                    <button class="new-btn" onclick="openModal('modalNewMaterial', 'material')">+ Novo material</button>
+                </div>
+                <div class="table-area">
+                    <table class="data-table">
+                        <thead><tr><th>Nome</th><th>Quantidade</th><th>Unidade</th><th>Preço</th><th>Ações</th></tr></thead>
+                        <tbody id="materiaisBody"></tbody>
+                    </table>
+                    <p class="empty-msg">Nenhum material cadastrado.</p>
+                </div>
+            </section>
+
+            <section class="page" id="page-materiais-estoque-baixo">
+                <div class="topbar">
+                    <h2>⚠️ Estoque Baixo</h2>
+                </div>
+                <div class="cards">
+                    <div class="card alert-card">
+                        <span>Itens com estoque abaixo do mínimo</span>
+                        <strong id="stat-estoqueBaixo">0</strong>
+                    </div>
+                </div>
+                <div class="table-area">
+                    <table class="data-table">
+                        <thead><tr><th>Item</th><th>Categoria</th><th>Quantidade</th><th>Mínimo</th><th>Ação</th></tr></thead>
+                        <tbody id="estoqueBaixoBody"></tbody>
+                    </table>
+                    <p class="empty-msg">Todos os itens com estoque adequado.</p>
+                </div>
+            </section>
+
+            <!-- ==================== AGENDA ==================== -->
+            <section class="page" id="page-agenda-prazos">
+                <div class="topbar">
+                    <h2>📅 Prazos de Entrega</h2>
+                    <button class="new-btn" onclick="openModal('modalNewAgenda', 'prazo')">+ Novo prazo</button>
+                </div>
+                <div class="calendar-list" id="prazosList">
+                    <p class="empty-msg">Nenhum prazo cadastrado.</p>
+                </div>
+            </section>
+
+            <section class="page" id="page-agenda-retiradas">
+                <div class="topbar">
+                    <h2>📅 Retiradas</h2>
+                    <button class="new-btn" onclick="openModal('modalNewAgenda', 'retirada')">+ Nova retirada</button>
+                </div>
+                <div class="calendar-list" id="retiradasList">
+                    <p class="empty-msg">Nenhuma retirada agendada.</p>
+                </div>
+            </section>
+
+            <section class="page" id="page-agenda-compras">
+                <div class="topbar">
+                    <h2>📅 Compras</h2>
+                    <button class="new-btn" onclick="openModal('modalNewAgenda', 'compra')">+ Nova compra</button>
+                </div>
+                <div class="calendar-list" id="comprasList">
+                    <p class="empty-msg">Nenhuma compra agendada.</p>
+                </div>
+            </section>
+
+            <section class="page" id="page-agenda-compromissos">
+                <div class="topbar">
+                    <h2>📅 Compromissos</h2>
+                    <button class="new-btn" onclick="openModal('modalNewAgenda', 'compromisso')">+ Novo compromisso</button>
+                </div>
+                <div class="calendar-list" id="compromissosList">
+                    <p class="empty-msg">Nenhum compromisso agendado.</p>
+                </div>
+            </section>
+
+            <!-- ==================== FINANCEIRO ==================== -->
+            <section class="page" id="page-financeiro-receber">
+                <div class="topbar">
+                    <h2>💰 A Receber</h2>
+                </div>
+                <div class="cards">
+                    <div class="card">
+                        <span>Total a receber</span>
+                        <strong id="stat-totalReceber">R$ 0,00</strong>
+                    </div>
+                    <div class="card">
+                        <span>Vencidos</span>
+                        <strong id="stat-vencidos" class="text-danger">R$ 0,00</strong>
+                    </div>
+                </div>
+                <div class="table-area">
+                    <table class="data-table">
+                        <thead><tr><th>Cliente</th><th>Descrição</th><th>Valor</th><th>Vencimento</th><th>Ação</th></tr></thead>
+                        <tbody id="receberBody"></tbody>
+                    </table>
+                    <p class="empty-msg">Nenhum valor a receber.</p>
+                </div>
+            </section>
+
+            <section class="page" id="page-financeiro-recebido">
+                <div class="topbar">
+                    <h2>💰 Recebido</h2>
+                </div>
+                <div class="cards">
+                    <div class="card">
+                        <span>Total recebido (mês)</span>
+                        <strong id="stat-recebidoMes">R$ 0,00</strong>
+                    </div>
+                </div>
+                <div class="table-area">
+                    <table class="data-table">
+                        <thead><tr><th>Cliente</th><th>Descrição</th><th>Valor</th><th>Data pagamento</th></tr></thead>
+                        <tbody id="recebidoBody"></tbody>
+                    </table>
+                    <p class="empty-msg">Nenhum pagamento recebido.</p>
+                </div>
+            </section>
+
+            <section class="page" id="page-financeiro-despesas">
+                <div class="topbar">
+                    <h2>💰 Despesas</h2>
+                    <button class="new-btn" onclick="openModal('modalNewDespesa')">+ Nova despesa</button>
+                </div>
+                <div class="cards">
+                    <div class="card">
+                        <span>Total de despesas (mês)</span>
+                        <strong id="stat-despesasMes">R$ 0,00</strong>
+                    </div>
+                </div>
+                <div class="table-area">
+                    <table class="data-table">
+                        <thead><tr><th>Descrição</th><th>Categoria</th><th>Valor</th><th>Data</th><th>Ações</th></tr></thead>
+                        <tbody id="despesasBody"></tbody>
+                    </table>
+                    <p class="empty-msg">Nenhuma despesa registrada.</p>
+                </div>
+            </section>
+
+            <section class="page" id="page-financeiro-lucro">
+                <div class="topbar">
+                    <h2>💰 Lucro</h2>
+                </div>
+                <div class="cards">
+                    <div class="card">
+                        <span>Receita (mês)</span>
+                        <strong id="stat-receitaMes">R$ 0,00</strong>
+                    </div>
+                    <div class="card">
+                        <span>Despesas (mês)</span>
+                        <strong id="stat-despesasLucro">R$ 0,00</strong>
+                    </div>
+                    <div class="card">
+                        <span>Lucro (mês)</span>
+                        <strong id="stat-lucroMes" class="text-success">R$ 0,00</strong>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- ==================== MODALS ==================== -->
+
+    <!-- Modal: Nova Encomenda -->
+    <div class="modal" id="modalNewOrder">
+        <div class="modal-content">
+            <h3>Nova Encomenda</h3>
+            <div class="field">
+                <label>Cliente</label>
+                <select id="orderClient"><option value="">Selecione...</option></select>
+            </div>
+            <div class="field">
+                <label>Descrição</label>
+                <input type="text" id="orderDesc" placeholder="Ex: Vestido de festa">
+            </div>
+            <div class="field">
+                <label>Valor (R$)</label>
+                <input type="number" id="orderValue" step="0.01" min="0" placeholder="0,00">
+            </div>
+            <div class="field">
+                <label>Data de entrega</label>
+                <input type="date" id="orderDeadline">
+            </div>
+            <div class="field">
+                <label>Etapa inicial</label>
+                <select id="orderStage">
+                    <option value="ideias">Ideias</option>
+                    <option value="orcamento">Orçamento</option>
+                    <option value="aprovacao">Aguardando aprovação</option>
+                    <option value="material">Aguardando material</option>
+                    <option value="producao">Em produção</option>
+                    <option value="acabamento">Acabamento</option>
+                    <option value="pronto">Pronto</option>
+                    <option value="entregue">Entregue</option>
+                </select>
+            </div>
+            <div class="field">
+                <label>Observações</label>
+                <input type="text" id="orderNotes" placeholder="Opcional">
+            </div>
+            <button class="submit-btn" onclick="saveOrder()">Salvar</button>
+            <button class="btn-cancel" onclick="closeModal('modalNewOrder')">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- Modal: Novo Cliente -->
+    <div class="modal" id="modalNewClient">
+        <div class="modal-content">
+            <h3>Novo Cliente</h3>
+            <div class="field">
+                <label>Nome</label>
+                <input type="text" id="clientName" placeholder="Nome completo">
+            </div>
+            <div class="field">
+                <label>Telefone</label>
+                <input type="tel" id="clientPhone" placeholder="(00) 00000-0000">
+            </div>
+            <div class="field">
+                <label>Email</label>
+                <input type="email" id="clientEmail" placeholder="email@exemplo.com">
+            </div>
+            <div class="field">
+                <label>Observações</label>
+                <input type="text" id="clientNotes" placeholder="Opcional">
+            </div>
+            <button class="submit-btn" onclick="saveClient()">Salvar</button>
+            <button class="btn-cancel" onclick="closeModal('modalNewClient')">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- Modal: Novo Material -->
+    <div class="modal" id="modalNewMaterial">
+        <div class="modal-content">
+            <h3>Novo Material</h3>
+            <div class="field">
+                <label>Categoria</label>
+                <select id="matCategory">
+                    <option value="tecido">Tecido</option>
+                    <option value="aviamento">Aviamento</option>
+                    <option value="material">Material</option>
+                </select>
+            </div>
+            <div class="field">
+                <label>Nome</label>
+                <input type="text" id="matName" placeholder="Nome do material">
+            </div>
+            <div class="field" id="matColorField">
+                <label>Cor</label>
+                <input type="text" id="matColor" placeholder="Cor">
+            </div>
+            <div class="field">
+                <label>Quantidade</label>
+                <input type="number" id="matQty" step="0.01" min="0" placeholder="0">
+            </div>
+            <div class="field">
+                <label>Unidade</label>
+                <select id="matUnit">
+                    <option value="m">Metro</option>
+                    <option value="cm">Centímetro</option>
+                    <option value="rolo">Rolo</option>
+                    <option value="un">Unidade</option>
+                    <option value="kg">Quilograma</option>
+                    <option value="pct">Pacote</option>
+                </select>
+            </div>
+            <div class="field">
+                <label>Preço (R$)</label>
+                <input type="number" id="matPrice" step="0.01" min="0" placeholder="0,00">
+            </div>
+            <div class="field">
+                <label>Estoque mínimo</label>
+                <input type="number" id="matMinStock" step="0.01" min="0" placeholder="0">
+            </div>
+            <button class="submit-btn" onclick="saveMaterial()">Salvar</button>
+            <button class="btn-cancel" onclick="closeModal('modalNewMaterial')">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- Modal: Nova Despesa -->
+    <div class="modal" id="modalNewDespesa">
+        <div class="modal-content">
+            <h3>Nova Despesa</h3>
+            <div class="field">
+                <label>Descrição</label>
+                <input type="text" id="despDesc" placeholder="Ex: Aluguel, Fio, etc.">
+            </div>
+            <div class="field">
+                <label>Categoria</label>
+                <select id="despCategory">
+                    <option value="fixa">Fixa</option>
+                    <option value="variavel">Variável</option>
+                    <option value="material">Material</option>
+                    <option value="operacional">Operacional</option>
+                </select>
+            </div>
+            <div class="field">
+                <label>Valor (R$)</label>
+                <input type="number" id="despValue" step="0.01" min="0" placeholder="0,00">
+            </div>
+            <div class="field">
+                <label>Data</label>
+                <input type="date" id="despDate">
+            </div>
+            <button class="submit-btn" onclick="saveDespesa()">Salvar</button>
+            <button class="btn-cancel" onclick="closeModal('modalNewDespesa')">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- Modal: Agenda -->
+    <div class="modal" id="modalNewAgenda">
+        <div class="modal-content">
+            <h3>Novo Item na Agenda</h3>
+            <div class="field">
+                <label>Título</label>
+                <input type="text" id="agendaTitle" placeholder="Título">
+            </div>
+            <div class="field">
+                <label>Data</label>
+                <input type="date" id="agendaDate">
+            </div>
+            <div class="field">
+                <label>Observações</label>
+                <input type="text" id="agendaNotes" placeholder="Opcional">
+            </div>
+            <button class="submit-btn" onclick="saveAgenda()">Salvar</button>
+            <button class="btn-cancel" onclick="closeModal('modalNewAgenda')">Cancelar</button>
+        </div>
+    </div>
+
+    <script src="scripts.js"></script>
+</body>
+</html>
