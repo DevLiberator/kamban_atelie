@@ -1,13 +1,16 @@
 {
   "name": "Ateliê da Kácia — Sistema de Gestão",
   "short_name": "Ateliê Kácia",
-  "description": "Sistema de gestão para ateliê de costura",
+  "description": "Sistema de gestão completo para ateliê de costura: kanban, encomendas, clientes, estoque, agenda e financeiro.",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#f4f1ec",
   "theme_color": "#111111",
   "lang": "pt-BR",
+  "categories": ["business", "productivity", "utilities"],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "icon-192.svg",

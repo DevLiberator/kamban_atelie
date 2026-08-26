@@ -26,6 +26,43 @@ body {
 }
 
 /* ========================= */
+/* PWA INSTALL                */
+/* ========================= */
+
+pwa-install {
+  --install-button-color: var(--accent);
+  --install-button-text-color: #fff;
+  --modal-background-color: #fff;
+  --modal-text-color: var(--text);
+  display: block;
+  margin-bottom: 16px;
+}
+
+pwa-install::part(installButton) {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.15s;
+  width: auto;
+}
+
+pwa-install::part(installButton):hover {
+  background: var(--accent-hover);
+}
+
+pwa-install[installed] {
+  display: none;
+}
+
+/* ========================= */
 /* OFFLINE BANNER            */
 /* ========================= */
 

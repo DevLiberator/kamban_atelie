@@ -1,4 +1,4 @@
-const CACHE_NAME = 'atelie-v2';
+const CACHE_NAME = 'atelie-v3';
 const ASSETS = [
   './',
   './index.html',
@@ -6,6 +6,7 @@ const ASSETS = [
   './style.css',
   './scripts.js',
   './DragDropTouch.js',
+  './pwa-install.js',
   './manifest.json',
   './icon-192.svg',
   './icon-512.svg',
